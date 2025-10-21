@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Sign in • guns.lol local</title>
+  <link rel="stylesheet" href="/style.css">
+</head>
+<body class="bg-dark">
+  <main class="container form-card">
+    <div class="card">
+      <h1 style="margin-top:0;">Welcome back</h1>
+      <p style="color:var(--muted); margin-top:0;">Sign in to manage your profile.</p>
+      <% if (error) { %>
+        <div class="alert"><%= error %></div>
+      <% } %>
+      <form method="post" action="/login">
+        <% if (csrfToken) { %>
+          <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+        <% } %>
+        <label for="username">Username</label>
+        <input type="text" id="username" name="username" required autofocus>
+        <label for="password">Password</label>
+        <input type="password" id="password" name="password" required>
+        <button type="submit" class="btn" style="width:100%;">Sign in</button>
+      </form>
+      <p style="color:var(--muted); margin-top:1rem; font-size:0.85rem;">Default admin: <code>admin / admin123</code>. Change it after seeding.</p>
+    </div>
+  </main>
+</body>
+</html>

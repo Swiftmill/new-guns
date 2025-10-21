@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Dashboard • <%= user.displayName %></title>
+  <link rel="stylesheet" href="/style.css">
+  <script type="module" src="/player.js"></script>
+</head>
+<body>
+  <header class="container">
+    <div class="logo">guns.lol local</div>
+    <nav>
+      <a href="/">Home</a>
+      <% if (currentUser.role === 'admin') { %>
+        <a href="/paneladmin">Admin</a>
+      <% } %>
+      <form style="display:inline" method="post" action="/logout">
+        <% if (csrfToken) { %>
+          <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+        <% } %>
+        <button class="btn btn-secondary" type="submit">Logout</button>
+      </form>
+    </nav>
+  </header>
+
+  <main class="container">
+    <h1>Hey, <%= user.displayName %> 👋</h1>
+    <p style="color:var(--muted);max-width:620px;">All profile data is stored in <code>/data/guns/users/<%= user.username %>.json</code>. Update it via the API or admin panel to instantly change your live page.</p>
+
+    <section class="dashboard-grid">
+      <article class="dashboard-widget">
+        <h2>Profile snapshot</h2>
+        <p><strong>Alias:</strong> @<%= user.username %></p>
+        <p><strong>Badges:</strong> <%= (user.badges || []).join(', ') || 'None' %></p>
+        <p><strong>Updated:</strong> <%= new Date(user.updatedAt).toLocaleString() %></p>
+      </article>
+
+      <article class="dashboard-widget">
+        <h2>Media</h2>
+        <% if (user.media?.avatar) { %>
+          <p><strong>Avatar:</strong> <a href="<%= user.media.avatar %>" target="_blank">Preview</a></p>
+        <% } %>
+        <% if (user.media?.background) { %>
+          <p><strong>Background:</strong> <a href="<%= user.media.background %>" target="_blank">Preview</a></p>
+        <% } %>
+        <% if (user.media?.music) { %>
+          <div data-audio-player style="margin-top:1rem;">
+            <audio src="<%= user.media.music %>"></audio>
+            <button data-action="play" class="btn btn-secondary" type="button">Play</button>
+            <input type="range" min="0" value="0" step="0.5">
+            <span data-el="time" style="margin-left:0.5rem;">0:00 / 0:00</span>
+          </div>
+        <% } else { %>
+          <p>No music uploaded yet.</p>
+        <% } %>
+      </article>
+    </section>
+  </main>
+</body>
+</html>

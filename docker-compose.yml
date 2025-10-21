@@ -1,0 +1,13 @@
+version: '3.9'
+services:
+  web:
+    build: .
+    ports:
+      - "3000:3000"
+    environment:
+      - SESSION_SECRET=${SESSION_SECRET:-guns-dev-secret}
+      - PORT=3000
+      - GUNS_DATA_ROOT=/data/guns
+    volumes:
+      - ./data:/data/guns
+    command: npm start

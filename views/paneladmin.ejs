@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Admin panel • guns.lol local</title>
+  <link rel="stylesheet" href="/style.css">
+</head>
+<body>
+  <header class="container">
+    <div class="logo">guns.lol admin</div>
+    <nav>
+      <a href="/">Home</a>
+      <a href="/dashboard">My profile</a>
+      <form style="display:inline" method="post" action="/logout">
+        <% if (csrfToken) { %>
+          <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+        <% } %>
+        <button class="btn btn-secondary" type="submit">Logout</button>
+      </form>
+    </nav>
+  </header>
+
+  <main class="container">
+    <section class="dashboard-grid">
+      <article class="dashboard-widget">
+        <h2>Create user</h2>
+        <form id="create-user">
+          <% if (csrfToken) { %>
+            <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+          <% } %>
+          <label for="username">Username</label>
+          <input id="username" name="username" required>
+          <label for="password">Password</label>
+          <input id="password" name="password" required>
+          <label for="displayName">Display name</label>
+          <input id="displayName" name="displayName" required>
+          <label for="role">Role</label>
+          <select id="role" name="role">
+            <option value="user">User</option>
+            <option value="admin">Admin</option>
+          </select>
+          <label for="badges">Badges (comma separated)</label>
+          <input id="badges" name="badges" placeholder="verified, premium">
+          <button class="btn" type="submit">Create</button>
+        </form>
+        <div id="create-user-result" class="alert" style="display:none;margin-top:1rem;"></div>
+      </article>
+
+      <article class="dashboard-widget">
+        <h2>Existing users</h2>
+        <table>
+          <thead>
+            <tr>
+              <th>Username</th>
+              <th>Role</th>
+              <th>Badges</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            <% users.forEach(function(user) { %>
+              <tr>
+                <td><a href="/<%= user.username %>" target="_blank">@<%= user.username %></a></td>
+                <td><%= user.role %></td>
+                <td><%= (user.badges || []).join(', ') || '—' %></td>
+                <td>
+                  <button class="btn btn-secondary" data-action="delete" data-username="<%= user.username %>">Delete</button>
+                </td>
+              </tr>
+            <% }); %>
+          </tbody>
+        </table>
+      </article>
+    </section>
+  </main>
+
+  <script type="module">
+    const form = document.getElementById('create-user');
+    const result = document.getElementById('create-user-result');
+    if (form) {
+      form.addEventListener('submit', async (event) => {
+        event.preventDefault();
+        const formData = new FormData(form);
+        const payload = Object.fromEntries(formData.entries());
+        payload.badges = payload.badges ? payload.badges.split(',').map((b) => b.trim()).filter(Boolean) : [];
+        const response = await fetch('/api/users', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'CSRF-Token': formData.get('_csrf') || ''
+          },
+          body: JSON.stringify(payload)
+        });
+        const data = await response.json();
+        result.style.display = 'block';
+        if (!response.ok) {
+          result.textContent = data.message || 'Failed to create user';
+        } else {
+          result.textContent = `Created @${data.username}`;
+          setTimeout(() => window.location.reload(), 500);
+        }
+      });
+    }
+
+    document.querySelectorAll('[data-action="delete"]').forEach((button) => {
+      button.addEventListener('click', async () => {
+        if (!confirm(`Delete @${button.dataset.username}?`)) return;
+        const response = await fetch(`/api/users/${button.dataset.username}`, {
+          method: 'DELETE',
+          headers: {
+            'CSRF-Token': form?.querySelector('input[name="_csrf"]')?.value || ''
+          }
+        });
+        if (response.ok) {
+          window.location.reload();
+        } else {
+          alert('Delete failed');
+        }
+      });
+    });
+  </script>
+</body>
+</html>

@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title><%= user.displayName %> • guns.lol local</title>
+  <link rel="stylesheet" href="/style.css">
+  <script type="module" src="/player.js"></script>
+  <style>
+    body {
+      background: <%= user.settings?.theme?.backgroundColor || '#0f071a' %>;
+      color: <%= user.settings?.theme?.textColor || '#fff' %>;
+      min-height: 100vh;
+      margin: 0;
+      font-family: 'Inter', sans-serif;
+    }
+    .background-media {
+      position: fixed;
+      inset: 0;
+      z-index: -2;
+      overflow: hidden;
+    }
+    .background-media img,
+    .background-media video {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      filter: blur(30px) brightness(0.5);
+    }
+    .profile-card-container {
+      width: min(480px, 100%);
+      margin: 5rem auto;
+      padding: 1.5rem;
+    }
+    .profile-card-glass {
+      background: rgba(17, 8, 30, <%= user.settings?.theme?.opacity || 0.85 %>);
+      border-radius: 32px;
+      padding: 2.5rem 2rem;
+      border: 1px solid rgba(255,255,255,0.12);
+      backdrop-filter: blur(<%= user.settings?.theme?.blur || 18 %>px);
+      box-shadow: 0 30px 60px rgba(0,0,0,0.45);
+      position: relative;
+      overflow: hidden;
+    }
+    .profile-card-glass::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(135deg, rgba(143, 90, 252, 0.35), rgba(45, 18, 99, 0.45));
+      opacity: 0.35;
+      pointer-events: none;
+    }
+    .profile-card-content {
+      position: relative;
+      z-index: 2;
+      text-align: center;
+    }
+    .profile-avatar {
+      width: 120px;
+      height: 120px;
+      border-radius: 36px;
+      object-fit: cover;
+      border: 3px solid rgba(255,255,255,0.35);
+      margin-bottom: 1rem;
+    }
+    .profile-badges {
+      display: inline-flex;
+      gap: 0.5rem;
+      margin-top: 0.75rem;
+      flex-wrap: wrap;
+      justify-content: center;
+    }
+    .profile-badges span {
+      background: rgba(143, 90, 252, 0.2);
+      color: <%= user.settings?.theme?.accentColor || '#8f5afc' %>;
+      padding: 0.3rem 0.8rem;
+      border-radius: 999px;
+      text-transform: uppercase;
+      font-size: 0.7rem;
+      letter-spacing: 0.06em;
+    }
+  </style>
+</head>
+<body>
+  <% if (user.media?.background) { %>
+    <div class="background-media">
+      <img src="<%= user.media.background %>" alt="background" loading="lazy">
+    </div>
+  <% } %>
+  <% if (user.media?.video) { %>
+    <div class="background-media">
+      <video src="<%= user.media.video %>" autoplay muted loop playsinline></video>
+    </div>
+  <% } %>
+  <main class="profile-card-container">
+    <section class="profile-card-glass">
+      <div class="profile-card-content">
+        <img class="profile-avatar" src="<%= user.media?.avatar || '/images/default-avatar.svg' %>" alt="Avatar for <%= user.username %>">
+        <h1 style="margin:0;font-size:2.2rem;"> <%= user.displayName %> </h1>
+        <p style="opacity:0.75;margin:0.25rem 0 0.75rem;">@<%= user.username %></p>
+        <p style="max-width:360px;margin:0 auto 1.5rem;opacity:0.85;"><%= user.description %></p>
+        <% if (user.badges?.length) { %>
+          <div class="profile-badges">
+            <% user.badges.forEach(function(badge) { %>
+              <span><%= badge %></span>
+            <% }) %>
+          </div>
+        <% } %>
+        <div class="profile-links" style="margin-top:2rem;">
+          <% (user.socials || []).forEach(function(link) { %>
+            <a href="<%= link.url %>" target="_blank" style="border-color: rgba(255,255,255,0.15);">
+              <span><%= link.label %></span>
+              <span style="opacity:0.6;">↗</span>
+            </a>
+          <% }) %>
+        </div>
+        <% if (user.media?.music) { %>
+          <div data-audio-player style="margin-top:2rem;background:rgba(0,0,0,0.25);padding:1rem;border-radius:18px;">
+            <audio src="<%= user.media.music %>"></audio>
+            <button data-action="play" class="btn btn-secondary" type="button" style="margin-right:1rem;">Play</button>
+            <input type="range" min="0" value="0" step="0.5" style="width:50%;">
+            <span data-el="time" style="margin-left:0.5rem;">0:00 / 0:00</span>
+          </div>
+        <% } %>
+      </div>
+    </section>
+  </main>
+</body>
+</html>

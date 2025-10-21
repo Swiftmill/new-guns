@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>guns.lol local replica</title>
+  <link rel="stylesheet" href="/style.css">
+</head>
+<body>
+  <header class="container">
+    <div class="logo">guns.lol <span style="color: var(--primary)">local</span></div>
+    <nav>
+      <% if (currentUser) { %>
+        <a href="/dashboard">Dashboard</a>
+        <% if (currentUser.role === 'admin') { %>
+          <a href="/paneladmin">Admin</a>
+        <% } %>
+        <form style="display:inline" method="post" action="/logout">
+          <% if (csrfToken) { %>
+            <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+          <% } %>
+          <button type="submit" class="btn btn-secondary">Logout</button>
+        </form>
+      <% } else { %>
+        <a href="/login">Login</a>
+      <% } %>
+    </nav>
+  </header>
+
+  <main class="container">
+    <section class="hero">
+      <div class="hero-text">
+        <h1>Everything you want, right here.</h1>
+        <p>Build premium bio pages backed by local JSON files and blazing-fast static assets. No database required, perfect for self-hosted communities.</p>
+        <div class="hero-actions">
+          <a class="btn" href="/paneladmin">Launch Admin Panel</a>
+          <a class="btn btn-secondary" href="https://guns.lol" target="_blank">Original guns.lol</a>
+        </div>
+      </div>
+      <div class="card">
+        <h3>Instant setup</h3>
+        <p>Spin up dozens or hundreds of user pages from disk in seconds using the seed generator and JSON API.</p>
+        <p>Assets live under <code>/uploads/&lt;username&gt;</code> for easy backups and portability.</p>
+      </div>
+    </section>
+
+    <section>
+      <h2 style="margin-top:3rem;">Featured profiles</h2>
+      <div class="card-grid">
+        <% if (!users.length) { %>
+          <div class="card">
+            <p>No profiles yet. Seed the project to generate demo accounts.</p>
+          </div>
+        <% } %>
+        <% users.forEach(function(profile) { %>
+          <a class="card profile-card" href="/<%= profile.username %>">
+            <div class="header">
+              <img src="<%= profile.media?.avatar || '/images/default-avatar.svg' %>" alt="Avatar for <%= profile.username %>">
+              <div>
+                <h3><%= profile.displayName %></h3>
+                <p style="color:var(--muted);">@<%= profile.username %></p>
+              </div>
+            </div>
+            <% if (profile.badges?.length) { %>
+              <div class="badges">
+                <% profile.badges.forEach(function(badge) { %>
+                  <span class="badge"><%= badge %></span>
+                <% }) %>
+              </div>
+            <% } %>
+            <p style="margin-top:1rem;color:var(--muted);"><%= profile.description || 'Click to view page' %></p>
+          </a>
+        <% }) %>
+      </div>
+    </section>
+  </main>
+
+  <footer class="footer">
+    <p>Self-hosted guns.lol replica • Data directory: <code><%= paths?.root || process.env.GUNS_DATA_ROOT || '/data/guns' %></code></p>
+  </footer>
+</body>
+</html>
